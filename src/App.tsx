@@ -200,7 +200,7 @@ function App() {
     }
   }
 
-  // File upload with presigned URL (reproduces GitHub issue #1662)
+  // File upload with presigned URL
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setSelectedFile(e.target.files[0])
@@ -235,7 +235,7 @@ function App() {
       console.log('Presigned URL data:', urlData)
       setUploadResponse({ step: 'Got presigned URL', data: urlData })
 
-      // Step 2: Upload file using presigned URL (this will trigger CORS issue)
+      // Step 2: Upload file using presigned URL
       const formData = new FormData()
       formData.append('file', selectedFile)
       formData.append('cacheControl', '3600')
@@ -244,7 +244,6 @@ function App() {
 
       console.log('Uploading to:', uploadUrl.toString())
 
-      // This fetch will fail with CORS error (reproducing GitHub issue #1662)
       const uploadResponse = await fetch(uploadUrl.toString(), {
         method: 'PUT',
         body: formData,
@@ -283,12 +282,6 @@ function App() {
         </a>
       </div>
       <h1>Vite + React + Supabase Edge Functions</h1>
-
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-      </div>
 
       <div className="card">
         <h2>Edge Function Invokers</h2>
@@ -411,9 +404,9 @@ function App() {
       </div>
 
       <div className="card">
-        <h2>📤 File Upload with Presigned URL (GitHub Issue #1662)</h2>
+        <h2>📤 File Upload with Presigned URL</h2>
         <p style={{ fontSize: '14px', color: '#888', marginBottom: '15px' }}>
-          This reproduces the CORS issue when uploading files directly using presigned URLs.
+          Upload files directly to Supabase Storage using presigned URLs.
         </p>
 
         <div style={{ marginBottom: '20px', padding: '15px', border: '1px solid #333', borderRadius: '8px' }}>
@@ -438,14 +431,10 @@ function App() {
 
         {uploadError && (
           <div style={{ marginTop: '15px', padding: '15px', background: '#d32f2f', borderRadius: '8px' }}>
-            <h4>❌ Error (CORS Issue):</h4>
+            <h4>❌ Upload Error:</h4>
             <pre style={{ textAlign: 'left', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
               {uploadError}
             </pre>
-            <p style={{ fontSize: '12px', marginTop: '10px', color: '#ffcccb' }}>
-              This is the CORS issue from GitHub issue #1662. The browser blocks the request because
-              the presigned upload URL doesn't have proper CORS headers.
-            </p>
           </div>
         )}
 
