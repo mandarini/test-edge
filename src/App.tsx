@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import supaLogo from './assets/supabase-logo-icon.svg'
 import './App.css'
 import { supabase } from './supabaseClient'
 import { FunctionsHttpError, FunctionsRelayError, FunctionsFetchError } from '@supabase/supabase-js'
@@ -273,11 +272,8 @@ function App() {
   return (
     <>
       <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
+        <a href="https://supabase.com" target="_blank">
+          <img src={supaLogo} className="logo supabase" alt="Supabase logo" />
         </a>
       </div>
       <h1>Edge Functions Playground</h1>
