@@ -2,6 +2,12 @@
 
 A React + TypeScript + Vite application demonstrating various Supabase Edge Functions patterns, including database operations, file uploads with presigned URLs, and CORS handling.
 
+## 🚀 Live Demo
+
+**Try it out:** [https://supa-edge-test.netlify.app/](https://supa-edge-test.netlify.app/)
+
+Test all the edge functions and HTTP methods live in your browser!
+
 ## Features
 
 This playground demonstrates:
