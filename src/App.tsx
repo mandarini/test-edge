@@ -9,11 +9,17 @@ function App() {
   const [count, setCount] = useState(0)
   const [helloWorldResponse, setHelloWorldResponse] = useState<any>(null)
   const [testCorsResponse, setTestCorsResponse] = useState<any>(null)
-  const [loading, setLoading] = useState<{ helloWorld: boolean; testCors: boolean; dbOps: boolean }>({
+  const [loading, setLoading] = useState<{ helloWorld: boolean; testCors: boolean; dbOps: boolean; fileUpload: boolean }>({
     helloWorld: false,
     testCors: false,
-    dbOps: false
+    dbOps: false,
+    fileUpload: false
   })
+
+  // File upload state
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [uploadResponse, setUploadResponse] = useState<any>(null)
+  const [uploadError, setUploadError] = useState<string | null>(null)
 
   // DB Operations state
   const [dbOpsResponse, setDbOpsResponse] = useState<any>(null)
@@ -194,6 +200,78 @@ function App() {
     }
   }
 
+  // File upload with presigned URL (reproduces GitHub issue #1662)
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedFile(e.target.files[0])
+      setUploadResponse(null)
+      setUploadError(null)
+    }
+  }
+
+  const uploadFileWithPresignedUrl = async () => {
+    if (!selectedFile) {
+      alert('Please select a file first')
+      return
+    }
+
+    setLoading(prev => ({ ...prev, fileUpload: true }))
+    setUploadError(null)
+    setUploadResponse(null)
+
+    try {
+      // Step 1: Get presigned URL from edge function
+      const { data: urlData, error: urlError } = await supabase.functions.invoke('generate-upload-url', {
+        body: {
+          fileName: selectedFile.name,
+          bucketName: 'test-uploads'
+        }
+      })
+
+      if (urlError) {
+        throw new Error(`Failed to get presigned URL: ${urlError.message}`)
+      }
+
+      console.log('Presigned URL data:', urlData)
+      setUploadResponse({ step: 'Got presigned URL', data: urlData })
+
+      // Step 2: Upload file using presigned URL (this will trigger CORS issue)
+      const formData = new FormData()
+      formData.append('file', selectedFile)
+      formData.append('cacheControl', '3600')
+
+      const uploadUrl = new URL(urlData.signedUrl)
+
+      console.log('Uploading to:', uploadUrl.toString())
+
+      // This fetch will fail with CORS error (reproducing GitHub issue #1662)
+      const uploadResponse = await fetch(uploadUrl.toString(), {
+        method: 'PUT',
+        body: formData,
+        headers: {
+          'x-upsert': 'false',
+        },
+      })
+
+      const uploadResult = await uploadResponse.json()
+
+      if (uploadResponse.ok) {
+        setUploadResponse({
+          step: 'Upload successful!',
+          data: urlData,
+          uploadResult
+        })
+      } else {
+        setUploadError(`Upload failed: ${JSON.stringify(uploadResult)}`)
+      }
+    } catch (err: any) {
+      console.error('Upload error:', err)
+      setUploadError(err.message || String(err))
+    } finally {
+      setLoading(prev => ({ ...prev, fileUpload: false }))
+    }
+  }
+
   return (
     <>
       <div>
@@ -327,6 +405,55 @@ function App() {
             <h4>Response:</h4>
             <pre style={{ textAlign: 'left', background: '#1a1a1a', padding: '15px', borderRadius: '8px' }}>
               {JSON.stringify(dbOpsResponse, null, 2)}
+            </pre>
+          </div>
+        )}
+      </div>
+
+      <div className="card">
+        <h2>📤 File Upload with Presigned URL (GitHub Issue #1662)</h2>
+        <p style={{ fontSize: '14px', color: '#888', marginBottom: '15px' }}>
+          This reproduces the CORS issue when uploading files directly using presigned URLs.
+        </p>
+
+        <div style={{ marginBottom: '20px', padding: '15px', border: '1px solid #333', borderRadius: '8px' }}>
+          <input
+            type="file"
+            onChange={handleFileChange}
+            style={{ marginBottom: '10px' }}
+          />
+          {selectedFile && (
+            <p style={{ fontSize: '14px', color: '#666' }}>
+              Selected: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(2)} KB)
+            </p>
+          )}
+          <button
+            onClick={uploadFileWithPresignedUrl}
+            disabled={!selectedFile || loading.fileUpload}
+            style={{ marginTop: '10px' }}
+          >
+            {loading.fileUpload ? 'Uploading...' : 'Upload with Presigned URL'}
+          </button>
+        </div>
+
+        {uploadError && (
+          <div style={{ marginTop: '15px', padding: '15px', background: '#d32f2f', borderRadius: '8px' }}>
+            <h4>❌ Error (CORS Issue):</h4>
+            <pre style={{ textAlign: 'left', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+              {uploadError}
+            </pre>
+            <p style={{ fontSize: '12px', marginTop: '10px', color: '#ffcccb' }}>
+              This is the CORS issue from GitHub issue #1662. The browser blocks the request because
+              the presigned upload URL doesn't have proper CORS headers.
+            </p>
+          </div>
+        )}
+
+        {uploadResponse && (
+          <div style={{ marginTop: '15px' }}>
+            <h4>✅ Response:</h4>
+            <pre style={{ textAlign: 'left', background: '#1a1a1a', padding: '15px', borderRadius: '8px' }}>
+              {JSON.stringify(uploadResponse, null, 2)}
             </pre>
           </div>
         )}
