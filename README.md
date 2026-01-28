@@ -10,6 +10,7 @@ This playground demonstrates:
 - **Database CRUD Operations**: Create, Read, Update, and Delete operations through edge functions
 - **File Uploads**: Upload files to Supabase Storage using presigned URLs
 - **CORS Configuration**: Proper handling of CORS preflight requests in edge functions
+- **HTTP DELETE Method**: Demonstrates the fix for GitHub Issue #1466 - using actual HTTP DELETE with proper CORS headers
 
 ## Edge Functions
 
@@ -29,6 +30,9 @@ Performs database operations on the `todos` table:
 ### 4. `generate-upload-url`
 Generates presigned URLs for direct file uploads to Supabase Storage, with automatic URL fixing for local development.
 
+### 5. `delete-method`
+Demonstrates using actual HTTP DELETE method with proper CORS configuration. This function showcases the fix for [GitHub Issue #1466](https://github.com/supabase/supabase-js/issues/1466) where DELETE requests failed due to missing `Access-Control-Allow-Methods` header.
+
 ## Project Structure
 
 ```
@@ -39,11 +43,12 @@ Generates presigned URLs for direct file uploads to Supabase Storage, with autom
 ├── supabase/
 │   ├── functions/
 │   │   ├── _shared/
-│   │   │   └── cors.ts      # Shared CORS configuration
+│   │   │   └── cors.ts      # Shared CORS configuration with Access-Control-Allow-Methods
 │   │   ├── hello-world/
 │   │   ├── test-cors/
 │   │   ├── db-ops/
-│   │   └── generate-upload-url/
+│   │   ├── generate-upload-url/
+│   │   └── delete-method/   # HTTP DELETE method demo (Issue #1466 fix)
 │   └── migrations/
 │       ├── create_test_tables.sql
 │       ├── create_test_uploads_bucket.sql
@@ -96,6 +101,7 @@ supabase functions deploy hello-world
 supabase functions deploy test-cors
 supabase functions deploy db-ops
 supabase functions deploy generate-upload-url
+supabase functions deploy delete-method
 ```
 
 ### Push Migrations
@@ -129,6 +135,23 @@ During development, we discovered that edge functions require proper CORS handli
 1. Check for OPTIONS requests and return early with CORS headers
 2. Import shared CORS configuration from `_shared/cors.ts`
 3. Include CORS headers in all responses
+
+## HTTP DELETE Method & GitHub Issue #1466
+
+This project also demonstrates the fix for [GitHub Issue #1466](https://github.com/supabase/supabase-js/issues/1466), where users reported CORS errors when using actual HTTP DELETE methods with Supabase Edge Functions.
+
+**Root Cause**: The `Access-Control-Allow-Methods` header was missing from CORS configuration. This header is required for "non-simple" HTTP methods like DELETE, PUT, and PATCH.
+
+**The Fix**: Updated `supabase/functions/_shared/cors.ts` to include:
+```typescript
+'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS'
+```
+
+**Two Valid Approaches**:
+1. **POST with operation type** (simpler CORS) - Used in `db-ops` function
+2. **Actual HTTP DELETE method** (more RESTful) - Demonstrated in `delete-method` function
+
+Both approaches work, but they have different CORS requirements. See `DELETE-CORS-FIX.md` for a comprehensive explanation.
 
 ## Related Issues
 
