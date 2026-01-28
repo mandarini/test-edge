@@ -6,7 +6,6 @@ import { supabase } from './supabaseClient'
 import { FunctionsHttpError, FunctionsRelayError, FunctionsFetchError } from '@supabase/supabase-js'
 
 function App() {
-  const [count, setCount] = useState(0)
   const [helloWorldResponse, setHelloWorldResponse] = useState<any>(null)
   const [testCorsResponse, setTestCorsResponse] = useState<any>(null)
   const [loading, setLoading] = useState<{ helloWorld: boolean; testCors: boolean; dbOps: boolean; fileUpload: boolean }>({
@@ -281,7 +280,7 @@ function App() {
           <img src={reactLogo} className="logo react" alt="React logo" />
         </a>
       </div>
-      <h1>Vite + React + Supabase Edge Functions</h1>
+      <h1>Edge Functions Playground</h1>
 
       <div className="card">
         <h2>Edge Function Invokers</h2>
