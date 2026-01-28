@@ -11,6 +11,7 @@ node_modules
 dist
 dist-ssr
 *.local
+*.local.backup
 .env
 
 # Editor directories and files
