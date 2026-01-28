@@ -24,7 +24,7 @@ function App() {
   // DB Operations state
   const [dbOpsResponse, setDbOpsResponse] = useState<any>(null)
   const [todoTask, setTodoTask] = useState('')
-  const [todoUserId, setTodoUserId] = useState('user-123')
+  const [todoUserId, setTodoUserId] = useState('00000000-0000-0000-0000-000000000001')
   const [updateTodoId, setUpdateTodoId] = useState('')
   const [deleteTodoId, setDeleteTodoId] = useState('')
   const [todos, setTodos] = useState<any[]>([])
