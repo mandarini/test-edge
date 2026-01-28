@@ -17,12 +17,22 @@ function App() {
     dbOps: boolean;
     fileUpload: boolean;
     deleteMethod: boolean;
+    httpGet: boolean;
+    httpPost: boolean;
+    httpPut: boolean;
+    httpPatch: boolean;
+    httpDelete: boolean;
   }>({
     helloWorld: false,
     testCors: false,
     dbOps: false,
     fileUpload: false,
     deleteMethod: false,
+    httpGet: false,
+    httpPost: false,
+    httpPut: false,
+    httpPatch: false,
+    httpDelete: false,
   });
 
   // File upload state
@@ -33,6 +43,12 @@ function App() {
   // DELETE method test state
   const [deleteMethodResponse, setDeleteMethodResponse] = useState<any>(null);
   const [deleteMethodId, setDeleteMethodId] = useState("");
+
+  // All HTTP Methods test state
+  const [httpMethodResponse, setHttpMethodResponse] = useState<any>(null);
+  const [httpMethodTask, setHttpMethodTask] = useState("");
+  const [httpMethodTodoId, setHttpMethodTodoId] = useState("");
+  const [httpMethodComplete, setHttpMethodComplete] = useState(false);
 
   // DB Operations state
   const [dbOpsResponse, setDbOpsResponse] = useState<any>(null);
@@ -333,6 +349,149 @@ function App() {
     }
   };
 
+  // HTTP Methods Testing Functions
+  const testHttpGet = async () => {
+    setLoading((prev) => ({ ...prev, httpGet: true }));
+    setHttpMethodResponse(null);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("all-http-methods", {
+        method: "GET",
+      });
+
+      if (error) throw error;
+      setHttpMethodResponse(data);
+      if (data.data) {
+        setTodos(data.data);
+      }
+    } catch (err: any) {
+      console.error("GET error:", err);
+      setHttpMethodResponse({ error: err.message || String(err) });
+    } finally {
+      setLoading((prev) => ({ ...prev, httpGet: false }));
+    }
+  };
+
+  const testHttpPost = async () => {
+    if (!httpMethodTask.trim()) {
+      alert("Please enter a task");
+      return;
+    }
+
+    setLoading((prev) => ({ ...prev, httpPost: true }));
+    setHttpMethodResponse(null);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("all-http-methods", {
+        method: "POST",
+        body: { task: httpMethodTask },
+      });
+
+      if (error) throw error;
+      setHttpMethodResponse(data);
+      setHttpMethodTask("");
+      if (todos.length > 0) {
+        await testHttpGet(); // Refresh list
+      }
+    } catch (err: any) {
+      console.error("POST error:", err);
+      setHttpMethodResponse({ error: err.message || String(err) });
+    } finally {
+      setLoading((prev) => ({ ...prev, httpPost: false }));
+    }
+  };
+
+  const testHttpPut = async () => {
+    if (!httpMethodTodoId) {
+      alert("Please enter a Todo ID");
+      return;
+    }
+
+    setLoading((prev) => ({ ...prev, httpPut: true }));
+    setHttpMethodResponse(null);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("all-http-methods", {
+        method: "PUT",
+        body: {
+          id: parseInt(httpMethodTodoId),
+          is_complete: httpMethodComplete,
+        },
+      });
+
+      if (error) throw error;
+      setHttpMethodResponse(data);
+      if (todos.length > 0) {
+        await testHttpGet(); // Refresh list
+      }
+    } catch (err: any) {
+      console.error("PUT error:", err);
+      setHttpMethodResponse({ error: err.message || String(err) });
+    } finally {
+      setLoading((prev) => ({ ...prev, httpPut: false }));
+    }
+  };
+
+  const testHttpPatch = async () => {
+    if (!httpMethodTodoId) {
+      alert("Please enter a Todo ID");
+      return;
+    }
+
+    setLoading((prev) => ({ ...prev, httpPatch: true }));
+    setHttpMethodResponse(null);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("all-http-methods", {
+        method: "PATCH",
+        body: {
+          id: parseInt(httpMethodTodoId),
+          is_complete: httpMethodComplete,
+        },
+      });
+
+      if (error) throw error;
+      setHttpMethodResponse(data);
+      if (todos.length > 0) {
+        await testHttpGet(); // Refresh list
+      }
+    } catch (err: any) {
+      console.error("PATCH error:", err);
+      setHttpMethodResponse({ error: err.message || String(err) });
+    } finally {
+      setLoading((prev) => ({ ...prev, httpPatch: false }));
+    }
+  };
+
+  const testHttpDeleteMethod = async () => {
+    if (!httpMethodTodoId) {
+      alert("Please enter a Todo ID");
+      return;
+    }
+
+    setLoading((prev) => ({ ...prev, httpDelete: true }));
+    setHttpMethodResponse(null);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("all-http-methods", {
+        method: "DELETE",
+        body: { id: parseInt(httpMethodTodoId) },
+      });
+
+      if (error) throw error;
+      setHttpMethodResponse(data);
+      setHttpMethodTodoId("");
+      if (todos.length > 0) {
+        await testHttpGet(); // Refresh list
+      }
+    } catch (err: any) {
+      console.error("DELETE error:", err);
+      setHttpMethodResponse({ error: err.message || String(err) });
+    } finally {
+      setLoading((prev) => ({ ...prev, httpDelete: false }));
+    }
+  };
+
   return (
     <>
       <div>
@@ -602,9 +761,6 @@ function App() {
           <button onClick={testDeleteMethod} disabled={loading.deleteMethod}>
             {loading.deleteMethod ? "Deleting..." : "Delete Todo with HTTP DELETE"}
           </button>
-          <p style={{ fontSize: "11px", color: "#666", marginTop: "5px" }}>
-            ⚠️ This will actually delete the todo from the database!
-          </p>
         </div>
 
         {deleteMethodResponse && (
@@ -623,6 +779,172 @@ function App() {
               }}
             >
               {JSON.stringify(deleteMethodResponse, null, 2)}
+            </pre>
+          </div>
+        )}
+      </div>
+
+      <div className="card">
+        <h2>🌐 All HTTP Methods Test (Complete CORS Demonstration)</h2>
+        <p style={{ fontSize: "14px", color: "#888", marginBottom: "15px" }}>
+          Test all HTTP methods in one function. Shows which methods are "simple" vs "non-simple" for CORS.
+        </p>
+
+        <div
+          style={{
+            marginBottom: "20px",
+            padding: "15px",
+            border: "1px solid #4CAF50",
+            borderRadius: "8px",
+            background: "rgba(76, 175, 80, 0.1)",
+          }}
+        >
+          <h3 style={{ color: "#4CAF50", marginTop: 0 }}>
+            ✅ Simple Methods (No Access-Control-Allow-Methods needed)
+          </h3>
+
+          <div style={{ marginBottom: "15px" }}>
+            <h4 style={{ marginBottom: "8px" }}>GET - Read All Todos</h4>
+            <p style={{ fontSize: "12px", color: "#aaa", margin: "5px 0" }}>
+              GET is a simple HTTP method that doesn't trigger CORS preflight
+            </p>
+            <button onClick={testHttpGet} disabled={loading.httpGet}>
+              {loading.httpGet ? "Loading..." : "🔍 Test GET Method"}
+            </button>
+          </div>
+
+          <div>
+            <h4 style={{ marginBottom: "8px" }}>POST - Create New Todo</h4>
+            <p style={{ fontSize: "12px", color: "#aaa", margin: "5px 0" }}>
+              POST is a simple HTTP method (with certain content types)
+            </p>
+            <input
+              type="text"
+              placeholder="Task name..."
+              value={httpMethodTask}
+              onChange={(e) => setHttpMethodTask(e.target.value)}
+              style={{ width: "200px", padding: "8px", marginRight: "10px" }}
+            />
+            <button onClick={testHttpPost} disabled={loading.httpPost}>
+              {loading.httpPost ? "Creating..." : "➕ Test POST Method"}
+            </button>
+          </div>
+        </div>
+
+        <div
+          style={{
+            marginBottom: "20px",
+            padding: "15px",
+            border: "1px solid #FF9800",
+            borderRadius: "8px",
+            background: "rgba(255, 152, 0, 0.1)",
+          }}
+        >
+          <h3 style={{ color: "#FF9800", marginTop: 0 }}>
+            ⚠️ Non-Simple Methods (REQUIRE Access-Control-Allow-Methods)
+          </h3>
+          <p style={{ fontSize: "13px", color: "#aaa", marginBottom: "15px" }}>
+            These methods trigger CORS preflight and require the <code>Access-Control-Allow-Methods</code> header!
+          </p>
+
+          <div style={{ marginBottom: "15px" }}>
+            <label style={{ display: "block", marginBottom: "8px" }}>
+              <strong>Todo ID to modify:</strong>
+            </label>
+            <input
+              type="number"
+              placeholder="Enter Todo ID"
+              value={httpMethodTodoId}
+              onChange={(e) => setHttpMethodTodoId(e.target.value)}
+              style={{ width: "150px", padding: "8px", marginRight: "10px" }}
+            />
+            <label style={{ marginLeft: "10px" }}>
+              <input
+                type="checkbox"
+                checked={httpMethodComplete}
+                onChange={(e) => setHttpMethodComplete(e.target.checked)}
+                style={{ marginRight: "5px" }}
+              />
+              Mark as complete
+            </label>
+          </div>
+
+          <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+            <button
+              onClick={testHttpPut}
+              disabled={loading.httpPut}
+              style={{ background: "#FF9800" }}
+            >
+              {loading.httpPut ? "Updating..." : "🔄 Test PUT Method"}
+            </button>
+
+            <button
+              onClick={testHttpPatch}
+              disabled={loading.httpPatch}
+              style={{ background: "#FF9800" }}
+            >
+              {loading.httpPatch ? "Patching..." : "📝 Test PATCH Method"}
+            </button>
+
+            <button
+              onClick={testHttpDeleteMethod}
+              disabled={loading.httpDelete}
+              style={{ background: "#f44336" }}
+            >
+              {loading.httpDelete ? "Deleting..." : "🗑️ Test DELETE Method"}
+            </button>
+          </div>
+        </div>
+
+        <div
+          style={{
+            padding: "15px",
+            border: "1px solid #2196F3",
+            borderRadius: "8px",
+            background: "rgba(33, 150, 243, 0.1)",
+          }}
+        >
+          <h4 style={{ color: "#2196F3", marginTop: 0 }}>
+            📚 CORS Classification
+          </h4>
+          <div style={{ fontSize: "13px", color: "#aaa", lineHeight: "1.8" }}>
+            <p>
+              <strong>Simple Methods (work with basic CORS):</strong>
+              <br />
+              • GET, HEAD, POST (with simple content-types)
+              <br />
+              • Don't require <code>Access-Control-Allow-Methods</code> header
+            </p>
+            <p>
+              <strong>Non-Simple Methods (require full CORS):</strong>
+              <br />
+              • PUT, PATCH, DELETE, and custom methods
+              <br />
+              • MUST have <code>Access-Control-Allow-Methods</code> in preflight response
+              <br />
+              • Browser will block these requests without proper CORS headers!
+            </p>
+          </div>
+        </div>
+
+        {httpMethodResponse && (
+          <div style={{ marginTop: "20px" }}>
+            <h4>
+              {httpMethodResponse.error
+                ? "❌ Error Response:"
+                : "✅ Success Response:"}
+            </h4>
+            <pre
+              style={{
+                textAlign: "left",
+                background: httpMethodResponse.error ? "#d32f2f" : "#1a1a1a",
+                padding: "15px",
+                borderRadius: "8px",
+                maxHeight: "400px",
+                overflow: "auto",
+              }}
+            >
+              {JSON.stringify(httpMethodResponse, null, 2)}
             </pre>
           </div>
         )}

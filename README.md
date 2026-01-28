@@ -33,6 +33,9 @@ Generates presigned URLs for direct file uploads to Supabase Storage, with autom
 ### 5. `delete-method`
 Demonstrates using actual HTTP DELETE method with proper CORS configuration. This function showcases the fix for [GitHub Issue #1466](https://github.com/supabase/supabase-js/issues/1466) where DELETE requests failed due to missing `Access-Control-Allow-Methods` header.
 
+### 6. `all-http-methods`
+Comprehensive demonstration of all HTTP methods (GET, POST, PUT, PATCH, DELETE) in a single function. Shows the difference between "simple" methods (GET, POST) that don't require `Access-Control-Allow-Methods` and "non-simple" methods (PUT, PATCH, DELETE) that require it for CORS preflight to succeed.
+
 ## Project Structure
 
 ```
@@ -48,7 +51,8 @@ Demonstrates using actual HTTP DELETE method with proper CORS configuration. Thi
 │   │   ├── test-cors/
 │   │   ├── db-ops/
 │   │   ├── generate-upload-url/
-│   │   └── delete-method/   # HTTP DELETE method demo (Issue #1466 fix)
+│   │   ├── delete-method/       # HTTP DELETE method demo (Issue #1466 fix)
+│   │   └── all-http-methods/    # Complete HTTP methods CORS demonstration
 │   └── migrations/
 │       ├── create_test_tables.sql
 │       ├── create_test_uploads_bucket.sql
@@ -102,6 +106,7 @@ supabase functions deploy test-cors
 supabase functions deploy db-ops
 supabase functions deploy generate-upload-url
 supabase functions deploy delete-method
+supabase functions deploy all-http-methods
 ```
 
 ### Push Migrations
@@ -152,6 +157,12 @@ This project also demonstrates the fix for [GitHub Issue #1466](https://github.c
 2. **Actual HTTP DELETE method** (more RESTful) - Demonstrated in `delete-method` function
 
 Both approaches work, but they have different CORS requirements. See `DELETE-CORS-FIX.md` for a comprehensive explanation.
+
+**Complete HTTP Methods Testing**: The `all-http-methods` function provides a comprehensive demonstration of all HTTP methods:
+- **Simple methods** (GET, POST): Work with basic CORS headers
+- **Non-simple methods** (PUT, PATCH, DELETE): Require `Access-Control-Allow-Methods` header
+
+This clearly shows why the CORS fix is necessary for non-simple methods.
 
 ## Related Issues
 

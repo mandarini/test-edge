@@ -138,7 +138,14 @@ Start the development server:
 npm run dev
 ```
 
-Open the app at `http://localhost:5173` and scroll to the "HTTP DELETE Method Test" section at the bottom. This section demonstrates both approaches (POST vs DELETE) side-by-side.
+Open the app at `http://localhost:5173` and test:
+
+1. **HTTP DELETE Method Test** section - Shows the specific DELETE method implementation
+2. **All HTTP Methods Test** section - Comprehensive testing of all HTTP methods:
+   - ✅ Simple methods (GET, POST) - Work with basic CORS
+   - ⚠️ Non-simple methods (PUT, PATCH, DELETE) - Require `Access-Control-Allow-Methods`
+
+This clearly demonstrates why the CORS header is needed for non-simple methods.
 
 ### 3. Test with curl
 
@@ -172,6 +179,20 @@ if (error) {
 ```
 
 ## 📝 Implementation Examples
+
+### Comprehensive HTTP Methods Function
+
+See: `supabase/functions/all-http-methods/index.ts`
+
+This single function handles all HTTP methods and clearly demonstrates the CORS requirements for each:
+
+- **GET**: Simple method - retrieves all todos
+- **POST**: Simple method - creates a new todo
+- **PUT**: Non-simple method - updates a todo (requires Access-Control-Allow-Methods)
+- **PATCH**: Non-simple method - partially updates a todo (requires Access-Control-Allow-Methods)
+- **DELETE**: Non-simple method - deletes a todo (requires Access-Control-Allow-Methods)
+
+Each response includes the method type classification to show which methods need the additional CORS header.
 
 ### Complete Edge Function with DELETE Support
 
