@@ -57,7 +57,7 @@ function App() {
     setLoading(prev => ({ ...prev, testCors: true }))
     try {
       const { data, error } = await supabase.functions.invoke('test-cors', {
-        body: { message: 'Testing CORS from React' }
+        body: { message: 'Testing CORS from React', name: 'React User' }
       })
 
       if (error) {
