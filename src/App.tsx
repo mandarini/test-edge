@@ -129,7 +129,7 @@ function App() {
 
     setLoading((prev) => ({ ...prev, dbOps: true }));
     try {
-      const { data, error } = await supabase.functions.invoke("db-ops", {
+      const { error } = await supabase.functions.invoke("db-ops", {
         body: {
           operation: "create",
           table: "todos",
@@ -141,7 +141,7 @@ function App() {
       });
 
       if (error) throw error;
-      setDbOpsResponse(data);
+      setDbOpsResponse(null);
       setTodoTask("");
       await readTodos(); // Refresh list
     } catch (err) {
@@ -163,7 +163,7 @@ function App() {
       });
 
       if (error) throw error;
-      setDbOpsResponse(data);
+      setDbOpsResponse(null);
       setTodos(data.data || []);
     } catch (err) {
       console.error("Read error:", err);
@@ -181,7 +181,7 @@ function App() {
 
     setLoading((prev) => ({ ...prev, dbOps: true }));
     try {
-      const { data, error } = await supabase.functions.invoke("db-ops", {
+      const { error } = await supabase.functions.invoke("db-ops", {
         body: {
           operation: "update",
           table: "todos",
@@ -193,7 +193,7 @@ function App() {
       });
 
       if (error) throw error;
-      setDbOpsResponse(data);
+      setDbOpsResponse(null);
       await readTodos(); // Refresh list
     } catch (err) {
       console.error("Update error:", err);
@@ -211,7 +211,7 @@ function App() {
 
     setLoading((prev) => ({ ...prev, dbOps: true }));
     try {
-      const { data, error } = await supabase.functions.invoke("db-ops", {
+      const { error } = await supabase.functions.invoke("db-ops", {
         body: {
           operation: "delete",
           table: "todos",
@@ -220,7 +220,7 @@ function App() {
       });
 
       if (error) throw error;
-      setDbOpsResponse(data);
+      setDbOpsResponse(null);
       setDeleteTodoId("");
       await readTodos(); // Refresh list
     } catch (err) {
@@ -641,6 +641,28 @@ function App() {
             {loading.dbOps ? "Deleting..." : "Delete Todo"}
           </button>
         </div>
+
+        {dbOpsResponse?.error && (
+          <div
+            style={{
+              marginTop: "15px",
+              padding: "15px",
+              background: "#d32f2f",
+              borderRadius: "8px",
+            }}
+          >
+            <h4>❌ DB Operation Error:</h4>
+            <pre
+              style={{
+                textAlign: "left",
+                whiteSpace: "pre-wrap",
+                wordBreak: "break-word",
+              }}
+            >
+              {dbOpsResponse.error}
+            </pre>
+          </div>
+        )}
       </div>
 
       <div className="card">
