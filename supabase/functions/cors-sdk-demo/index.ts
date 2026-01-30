@@ -4,7 +4,7 @@
 
 // Setup type definitions for built-in Supabase Runtime APIs
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
-import { corsHeaders, createCorsHeaders } from 'npm:@supabase/supabase-js/cors'
+import { corsHeaders, createCorsHeaders } from '@supabase/supabase-js/cors'
 
 console.log("CORS SDK Demo Function")
 
@@ -224,28 +224,29 @@ function handleMultipleOrigins(req: Request): Response {
 
 # Basic CORS
 curl -i 'http://127.0.0.1:54321/functions/v1/cors-sdk-demo?scenario=basic' \
-  --header 'Authorization: Bearer eyJhbGciOiJFUzI1NiIsImtpZCI6ImI4MTI2OWYxLTIxZDgtNGYyZS1iNzE5LWMyMjQwYTg0MGQ5MCIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjIwODUxNDA5MTB9.28WpXfr9R774towFepgPfVrlg0fCEAHHYiQbJUixKd2fO_R-o9iLiHMWp0S5u1eV8rBxylzSPoVg1an7LXQdw'
+  --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0' \
 
 # Custom origin
 curl -i 'http://127.0.0.1:54321/functions/v1/cors-sdk-demo?scenario=custom-origin' \
-  --header 'Authorization: Bearer eyJhbGciOiJFUzI1NiIsImtpZCI6ImI4MTI2OWYxLTIxZDgtNGYyZS1iNzE5LWMyMjQwYTg0MGQ5MCIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjIwODUxNDA5MTB9.28WpXfr9R774towFepgPfVrlg0fCEAHHYiQbJUixKd2fO_R-o9iLiHMWp0S5u1eV8rBxylzSPoVg1an7LXQdw'
+  --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0' \
+
 
 # With credentials
 curl -i 'http://127.0.0.1:54321/functions/v1/cors-sdk-demo?scenario=with-credentials' \
-  --header 'Authorization: Bearer eyJhbGciOiJFUzI1NiIsImtpZCI6ImI4MTI2OWYxLTIxZDgtNGYyZS1iNzE5LWMyMjQwYTg0MGQ5MCIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjIwODUxNDA5MTB9.28WpXfr9R774towFepgPfVrlg0fCEAHHYiQbJUixKd2fO_R-o9iLiHMWp0S5u1eV8rBxylzSPoVg1an7LXQdw'
+  --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0' \
 
 # Additional headers
 curl -i 'http://127.0.0.1:54321/functions/v1/cors-sdk-demo?scenario=additional-headers' \
-  --header 'Authorization: Bearer eyJhbGciOiJFUzI1NiIsImtpZCI6ImI4MTI2OWYxLTIxZDgtNGYyZS1iNzE5LWMyMjQwYTg0MGQ5MCIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjIwODUxNDA5MTB9.28WpXfr9R774towFepgPfVrlg0fCEAHHYiQbJUixKd2fO_R-o9iLiHMWp0S5u1eV8rBxylzSPoVg1an7LXQdw'
+  --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0' \
 
 # Multiple origins validation
 curl -i 'http://127.0.0.1:54321/functions/v1/cors-sdk-demo?scenario=multiple-origins' \
-  --header 'Authorization: Bearer eyJhbGciOiJFUzI1NiIsImtpZCI6ImI4MTI2OWYxLTIxZDgtNGYyZS1iNzE5LWMyMjQwYTg0MGQ5MCIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjIwODUxNDA5MTB9.28WpXfr9R774towFepgPfVrlg0fCEAHHYiQbJUixKd2fO_R-o9iLiHMWp0S5u1eV8rBxylzSPoVg1an7LXQdw' \
+  --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0' \
   --header 'Origin: https://app1.com'
 
 # Test CORS preflight (OPTIONS)
 curl -i -X OPTIONS 'http://127.0.0.1:54321/functions/v1/cors-sdk-demo?scenario=basic' \
-  --header 'Authorization: Bearer eyJhbGciOiJFUzI1NiIsImtpZCI6ImI4MTI2OWYxLTIxZDgtNGYyZS1iNzE5LWMyMjQwYTg0MGQ5MCIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjIwODUxNDA5MTB9.28WpXfr9R774towFepgPfVrlg0fCEAHHYiQbJUixKd2fO_R-o9iLiHMWp0S5u1eV8rBxylzSPoVg1an7LXQdw' \
+  --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0' \
   --header 'Origin: https://example.com' \
   --header 'Access-Control-Request-Method: POST'
 
