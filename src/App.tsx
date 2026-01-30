@@ -70,6 +70,11 @@ function App() {
   const [httpMethodTodoId, setHttpMethodTodoId] = useState("");
   const [httpMethodComplete, setHttpMethodComplete] = useState(false);
 
+  // CORS SDK Demo state
+  const [corsScenario, setCorsScenario] = useState<string>("basic");
+  const [corsSdkResponse, setCorsSdkResponse] = useState<any>(null);
+  const [corsSdkLoading, setCorsSdkLoading] = useState(false);
+
   // DB Operations state
   const [dbOpsResponse, setDbOpsResponse] = useState<any>(null);
   const [todoTask, setTodoTask] = useState("");
@@ -509,6 +514,42 @@ function App() {
       setHttpMethodResponse({ error: err.message || String(err) });
     } finally {
       setLoading((prev) => ({ ...prev, httpDelete: false }));
+    }
+  };
+
+  // CORS SDK Demo test
+  const testCorsSdkScenario = async () => {
+    setCorsSdkLoading(true);
+    setCorsSdkResponse(null);
+
+    try {
+      const { data, error } = await supabase.functions.invoke(
+        `cors-sdk-demo?scenario=${corsScenario}`,
+        {
+          method: "GET",
+        }
+      );
+
+      if (error) {
+        if (error instanceof FunctionsHttpError) {
+          const errorMessage = await error.context.json();
+          console.error("Function returned an error", errorMessage);
+          setCorsSdkResponse({ error: errorMessage });
+        } else if (error instanceof FunctionsRelayError) {
+          console.error("Relay error:", error.message);
+          setCorsSdkResponse({ error: error.message });
+        } else if (error instanceof FunctionsFetchError) {
+          console.error("Fetch error:", error.message);
+          setCorsSdkResponse({ error: error.message });
+        }
+      } else {
+        setCorsSdkResponse(data);
+      }
+    } catch (err) {
+      console.error("Unexpected error:", err);
+      setCorsSdkResponse({ error: String(err) });
+    } finally {
+      setCorsSdkLoading(false);
     }
   };
 
@@ -990,6 +1031,160 @@ function App() {
             </pre>
           </div>
         )}
+      </div>
+
+      <div className="card">
+        <h2>🎯 CORS SDK Demo - All Scenarios</h2>
+        <p style={{ fontSize: "14px", color: "#888", marginBottom: "15px" }}>
+          Test the new @supabase/supabase-js/cors module with different configurations.
+          This demonstrates how the SDK automatically includes all required CORS headers.
+        </p>
+
+        <div
+          style={{
+            marginBottom: "20px",
+            padding: "15px",
+            border: "1px solid #9C27B0",
+            borderRadius: "8px",
+            background: "rgba(156, 39, 176, 0.1)",
+          }}
+        >
+          <h3 style={{ color: "#9C27B0", marginTop: 0 }}>
+            Select CORS Scenario
+          </h3>
+
+          <div style={{ marginBottom: "15px" }}>
+            <select
+              value={corsScenario}
+              onChange={(e) => setCorsScenario(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "10px",
+                fontSize: "14px",
+                borderRadius: "4px",
+                border: "1px solid #555",
+                background: "#1a1a1a",
+                color: "#fff",
+              }}
+            >
+              <option value="basic">Basic - Wildcard origin (*)</option>
+              <option value="custom-origin">Custom Origin - Specific domain</option>
+              <option value="with-credentials">With Credentials - Cookies & auth headers</option>
+              <option value="additional-headers">Additional Headers - Custom headers & methods</option>
+              <option value="multiple-origins">Multiple Origins - Allowlist validation</option>
+            </select>
+          </div>
+
+          <div
+            style={{
+              background: "#1a1a1a",
+              padding: "10px",
+              borderRadius: "4px",
+              marginBottom: "15px",
+              fontSize: "12px",
+              color: "#aaa",
+            }}
+          >
+            <strong>Scenario Description:</strong>
+            <br />
+            {corsScenario === "basic" && (
+              <>
+                Uses default <code>corsHeaders</code> - allows any origin with all Supabase SDK headers.
+              </>
+            )}
+            {corsScenario === "custom-origin" && (
+              <>
+                Uses <code>createCorsHeaders()</code> to restrict access to a specific origin (https://myapp.com).
+              </>
+            )}
+            {corsScenario === "with-credentials" && (
+              <>
+                Enables credentials with <code>createCorsHeaders({"{"}origin: 'https://myapp.com', credentials: true{"}"})</code>.
+              </>
+            )}
+            {corsScenario === "additional-headers" && (
+              <>
+                Adds custom headers beyond Supabase defaults: x-custom-header, x-api-version, x-request-id.
+              </>
+            )}
+            {corsScenario === "multiple-origins" && (
+              <>
+                Validates request origin against an allowlist and returns specific origin for credentials support.
+              </>
+            )}
+          </div>
+
+          <button
+            onClick={testCorsSdkScenario}
+            disabled={corsSdkLoading}
+            style={{ width: "100%", padding: "12px", fontSize: "16px" }}
+          >
+            {corsSdkLoading ? "Testing..." : `🧪 Test ${corsScenario} Scenario`}
+          </button>
+        </div>
+
+        {corsSdkResponse && (
+          <div style={{ marginTop: "20px" }}>
+            <h4>
+              {corsSdkResponse.error
+                ? "❌ Error Response:"
+                : "✅ Success Response:"}
+            </h4>
+            <pre
+              style={{
+                textAlign: "left",
+                background: corsSdkResponse.error ? "#d32f2f" : "#1a1a1a",
+                padding: "15px",
+                borderRadius: "8px",
+                maxHeight: "500px",
+                overflow: "auto",
+                fontSize: "12px",
+              }}
+            >
+              {JSON.stringify(corsSdkResponse, null, 2)}
+            </pre>
+          </div>
+        )}
+
+        <div
+          style={{
+            marginTop: "20px",
+            padding: "15px",
+            border: "1px solid #2196F3",
+            borderRadius: "8px",
+            background: "rgba(33, 150, 243, 0.1)",
+          }}
+        >
+          <h4 style={{ color: "#2196F3", marginTop: 0 }}>
+            📚 About @supabase/supabase-js/cors
+          </h4>
+          <div style={{ fontSize: "13px", color: "#aaa", lineHeight: "1.8" }}>
+            <p>
+              <strong>What it does:</strong>
+              <br />
+              Automatically includes all headers sent by Supabase client libraries (authorization, x-client-info, apikey, etc.)
+              and stays synchronized with SDK updates.
+            </p>
+            <p>
+              <strong>Usage in your code:</strong>
+              <br />
+              <code style={{ color: "#9C27B0" }}>
+                import {"{"}corsHeaders, createCorsHeaders{"}"} from '@supabase/supabase-js/cors'
+              </code>
+            </p>
+            <p>
+              <strong>Benefits:</strong>
+              <br />
+              • No more manual CORS header maintenance
+              <br />
+              • Automatically updated when SDK adds new headers
+              <br />
+              • Prevents CORS errors in Edge Functions
+              <br />
+              • Type-safe with TypeScript support
+            </p>
+          </div>
+        </div>
       </div>
 
       <p className="read-the-docs">
