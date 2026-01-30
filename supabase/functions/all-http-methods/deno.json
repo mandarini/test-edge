@@ -1,5 +1,5 @@
 {
   "imports": {
-    "@supabase/supabase-js": "https://esm.sh/pr/supabase/supabase-js/@supabase/supabase-js@35ec7fc?target=deno"
+    "@supabase/supabase-js": "https://esm.sh/pr/supabase/supabase-js/@supabase/supabase-js@dda608baff05c4005a3a1ff25a817ac529cd9085?target=deno"
   }
 }
