@@ -4,7 +4,7 @@
 
 // Setup type definitions for built-in Supabase Runtime APIs
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
-import { corsHeaders, createCorsHeaders, validateOrigin } from 'npm:@supabase/supabase-js/cors'
+import { corsHeaders, createCorsHeaders } from 'npm:@supabase/supabase-js/cors'
 
 console.log("CORS SDK Demo Function")
 
@@ -163,7 +163,7 @@ function handleAdditionalHeaders(req: Request): Response {
 
 /**
  * Scenario 5: Multiple origins validation
- * Uses validateOrigin helper to check against allowlist
+ * Validates request origin against an allowlist
  */
 function handleMultipleOrigins(req: Request): Response {
   const allowedOrigins = [
@@ -174,8 +174,8 @@ function handleMultipleOrigins(req: Request): Response {
 
   const requestOrigin = req.headers.get('Origin')
 
-  // Validate origin using the SDK helper
-  if (!validateOrigin(requestOrigin, allowedOrigins)) {
+  // Validate origin manually
+  if (requestOrigin && !allowedOrigins.includes(requestOrigin)) {
     return new Response(
       JSON.stringify({
         error: 'Origin not allowed',
@@ -202,11 +202,11 @@ function handleMultipleOrigins(req: Request): Response {
   return new Response(
     JSON.stringify({
       scenario: 'multiple-origins',
-      description: 'Uses validateOrigin helper to check against allowlist',
+      description: 'Validates origin against allowlist and returns specific origin',
       allowedOrigins: allowedOrigins,
       requestOrigin: requestOrigin,
       headers: validatedCorsHeaders,
-      message: 'Origin validated successfully using SDK helper',
+      message: 'Origin validated successfully',
       note: 'This pattern allows multiple origins while enabling credentials'
     }),
     {

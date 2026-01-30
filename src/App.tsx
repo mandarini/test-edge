@@ -8,6 +8,9 @@ import {
   FunctionsFetchError,
 } from "@supabase/supabase-js";
 
+import { corsHeaders, createCorsHeaders } from '@supabase/supabase-js/cors'
+
+
 function App() {
   const [helloWorldResponse, setHelloWorldResponse] = useState<any>(null);
   const [testCorsResponse, setTestCorsResponse] = useState<any>(null);
@@ -34,6 +37,23 @@ function App() {
     httpPatch: false,
     httpDelete: false,
   });
+
+
+  const headers = createCorsHeaders({
+    origin: "https://supa-edge-test.netlify.app",
+    credentials: true,
+  });
+
+  console.log("headers", headers);
+
+  const otherHeadersDefault = corsHeaders;
+  console.log("otherHeadersDefault", otherHeadersDefault);
+
+  const otherHeaders = createCorsHeaders({
+    origin: "https://supa-edge-test.netlify.app",
+    credentials: true,
+  });
+  console.log("otherHeaders", otherHeaders);
 
   // File upload state
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
