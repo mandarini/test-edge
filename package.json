@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@supabase/supabase-js": "https://pkg.pr.new/@supabase/supabase-js@dda608baff05c4005a3a1ff25a817ac529cd9085",
+    "@supabase/supabase-js": "https://pkg.pr.new/@supabase/supabase-js@2071",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
