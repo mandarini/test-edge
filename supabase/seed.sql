@@ -1,6 +1,9 @@
 -- Seed file for local development
 -- This runs after migrations when you do: supabase db reset
 
+-- Ensure pgcrypto extension is available for password hashing
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 -- Create a test user for local development
 -- Email: test@example.com
 -- Password: password123
@@ -27,8 +30,8 @@ INSERT INTO auth.users (
   'authenticated',
   'authenticated',
   'test@example.com',
-  -- This is bcrypt hash for 'password123'
-  '$2a$10$PznXR4PLO8Me.9A5gxYi0eB9GXl1Fg4Wj.0rxm.2N8UZQqMvBEKby',
+  -- This is bcrypt hash for 'password123' (generated with cost factor 10)
+  crypt('password123', gen_salt('bf')),
   NOW(),
   '{"provider": "email", "providers": ["email"]}',
   '{"name": "Test User"}',

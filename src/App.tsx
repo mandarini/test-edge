@@ -189,6 +189,10 @@ function App() {
           setGetClaimsResponse({ error: error.message });
         }
       } else {
+        console.log("✅ getClaims response:", data);
+        console.log("📧 User email:", data?.user?.email);
+        console.log("🆔 User ID:", data?.user?.id);
+        console.log("🔑 Full claims:", data?.claims);
         setGetClaimsResponse(data);
       }
     } catch (err) {
