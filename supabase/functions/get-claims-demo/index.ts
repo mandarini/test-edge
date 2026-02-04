@@ -83,7 +83,7 @@ Deno.serve(async (req) => {
   2. Make an HTTP request with a valid JWT:
 
   curl -i --location --request GET 'http://127.0.0.1:54321/functions/v1/get-claims-demo' \
-    --header 'Authorization: Bearer YOUR_JWT_TOKEN' \
+    --header 'Authorization: Bearer ' \
     --header 'Content-Type: application/json'
 
   To get a valid JWT, you can sign in a user and use their access_token.

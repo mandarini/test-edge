@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import supaLogo from "./assets/supabase-logo-icon.svg";
 import "./App.css";
 import { supabase } from "./supabaseClient";
@@ -7,6 +7,7 @@ import {
   FunctionsRelayError,
   FunctionsFetchError,
 } from "@supabase/supabase-js";
+import type { Session } from "@supabase/supabase-js";
 
 import { corsHeaders, createCorsHeaders } from '@supabase/supabase-js/cors'
 
@@ -25,6 +26,8 @@ function App() {
     httpPut: boolean;
     httpPatch: boolean;
     httpDelete: boolean;
+    auth: boolean;
+    getClaims: boolean;
   }>({
     helloWorld: false,
     testCors: false,
@@ -36,7 +39,33 @@ function App() {
     httpPut: false,
     httpPatch: false,
     httpDelete: false,
+    auth: false,
+    getClaims: false,
   });
+
+  // Auth state
+  const [session, setSession] = useState<Session | null>(null);
+  const [authEmail, setAuthEmail] = useState("");
+  const [authPassword, setAuthPassword] = useState("");
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [getClaimsResponse, setGetClaimsResponse] = useState<any>(null);
+
+  // Listen for auth state changes
+  useEffect(() => {
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    // Listen for changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
 
   const headers = createCorsHeaders({
@@ -84,6 +113,91 @@ function App() {
   const [updateTodoId, setUpdateTodoId] = useState("");
   const [deleteTodoId, setDeleteTodoId] = useState("");
   const [todos, setTodos] = useState<any[]>([]);
+
+  // Auth functions
+  const signUp = async () => {
+    if (!authEmail || !authPassword) {
+      setAuthError("Please enter email and password");
+      return;
+    }
+    setLoading((prev) => ({ ...prev, auth: true }));
+    setAuthError(null);
+    try {
+      const { error } = await supabase.auth.signUp({
+        email: authEmail,
+        password: authPassword,
+      });
+      if (error) throw error;
+      setAuthError("Check your email for the confirmation link!");
+    } catch (err: any) {
+      setAuthError(err.message || String(err));
+    } finally {
+      setLoading((prev) => ({ ...prev, auth: false }));
+    }
+  };
+
+  const signIn = async () => {
+    if (!authEmail || !authPassword) {
+      setAuthError("Please enter email and password");
+      return;
+    }
+    setLoading((prev) => ({ ...prev, auth: true }));
+    setAuthError(null);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: authEmail,
+        password: authPassword,
+      });
+      if (error) throw error;
+    } catch (err: any) {
+      setAuthError(err.message || String(err));
+    } finally {
+      setLoading((prev) => ({ ...prev, auth: false }));
+    }
+  };
+
+  const signOut = async () => {
+    setLoading((prev) => ({ ...prev, auth: true }));
+    try {
+      await supabase.auth.signOut();
+      setGetClaimsResponse(null);
+    } finally {
+      setLoading((prev) => ({ ...prev, auth: false }));
+    }
+  };
+
+  // Call get-claims-demo function
+  const invokeGetClaims = async () => {
+    setLoading((prev) => ({ ...prev, getClaims: true }));
+    setGetClaimsResponse(null);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("get-claims-demo", {
+        method: "GET",
+      });
+
+      if (error) {
+        if (error instanceof FunctionsHttpError) {
+          const errorMessage = await error.context.json();
+          console.error("Function returned an error", errorMessage);
+          setGetClaimsResponse({ error: errorMessage });
+        } else if (error instanceof FunctionsRelayError) {
+          console.error("Relay error:", error.message);
+          setGetClaimsResponse({ error: error.message });
+        } else if (error instanceof FunctionsFetchError) {
+          console.error("Fetch error:", error.message);
+          setGetClaimsResponse({ error: error.message });
+        }
+      } else {
+        setGetClaimsResponse(data);
+      }
+    } catch (err) {
+      console.error("Unexpected error:", err);
+      setGetClaimsResponse({ error: String(err) });
+    } finally {
+      setLoading((prev) => ({ ...prev, getClaims: false }));
+    }
+  };
 
   const invokeHelloWorld = async () => {
     setLoading((prev) => ({ ...prev, helloWorld: true }));
@@ -561,6 +675,160 @@ function App() {
         </a>
       </div>
       <h1>Edge Functions Playground</h1>
+
+      <div className="card">
+        <h2>🔐 Authentication & getClaims Demo</h2>
+        <p style={{ fontSize: "14px", color: "#888", marginBottom: "15px" }}>
+          Sign in to get a JWT token, then test the get-claims-demo Edge Function.
+        </p>
+
+        {session ? (
+          <div>
+            <div
+              style={{
+                marginBottom: "20px",
+                padding: "15px",
+                border: "1px solid #4CAF50",
+                borderRadius: "8px",
+                background: "rgba(76, 175, 80, 0.1)",
+              }}
+            >
+              <h3 style={{ color: "#4CAF50", marginTop: 0 }}>
+                ✅ Signed in as: {session.user.email}
+              </h3>
+              <p style={{ fontSize: "12px", color: "#aaa", margin: "10px 0" }}>
+                <strong>User ID:</strong> {session.user.id}
+              </p>
+              <button
+                onClick={signOut}
+                disabled={loading.auth}
+                style={{ background: "#666" }}
+              >
+                {loading.auth ? "Signing out..." : "Sign Out"}
+              </button>
+            </div>
+
+            <div
+              style={{
+                marginBottom: "20px",
+                padding: "15px",
+                border: "1px solid #9C27B0",
+                borderRadius: "8px",
+                background: "rgba(156, 39, 176, 0.1)",
+              }}
+            >
+              <h3 style={{ color: "#9C27B0", marginTop: 0 }}>
+                🧪 Test getClaims Function
+              </h3>
+              <p style={{ fontSize: "12px", color: "#aaa", marginBottom: "10px" }}>
+                This calls the <code>get-claims-demo</code> Edge Function which uses{" "}
+                <code>supabase.auth.getClaims(token)</code> to verify your JWT and extract claims.
+              </p>
+              <button
+                onClick={invokeGetClaims}
+                disabled={loading.getClaims}
+                style={{ width: "100%", padding: "12px", fontSize: "16px" }}
+              >
+                {loading.getClaims ? "Calling..." : "🔍 Invoke get-claims-demo"}
+              </button>
+            </div>
+
+            {getClaimsResponse && (
+              <div style={{ marginTop: "15px" }}>
+                <h4>
+                  {getClaimsResponse.error
+                    ? "❌ Error Response:"
+                    : "✅ Success Response:"}
+                </h4>
+                <pre
+                  style={{
+                    textAlign: "left",
+                    background: getClaimsResponse.error ? "#d32f2f" : "#1a1a1a",
+                    padding: "15px",
+                    borderRadius: "8px",
+                    maxHeight: "400px",
+                    overflow: "auto",
+                    fontSize: "12px",
+                  }}
+                >
+                  {JSON.stringify(getClaimsResponse, null, 2)}
+                </pre>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div
+            style={{
+              padding: "15px",
+              border: "1px solid #FF9800",
+              borderRadius: "8px",
+              background: "rgba(255, 152, 0, 0.1)",
+            }}
+          >
+            <h3 style={{ color: "#FF9800", marginTop: 0 }}>
+              Sign In or Sign Up
+            </h3>
+            <div style={{ marginBottom: "15px" }}>
+              <input
+                type="email"
+                placeholder="Email"
+                value={authEmail}
+                onChange={(e) => setAuthEmail(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "10px",
+                  marginBottom: "10px",
+                  borderRadius: "4px",
+                  border: "1px solid #555",
+                  background: "#1a1a1a",
+                  color: "#fff",
+                }}
+              />
+              <input
+                type="password"
+                placeholder="Password"
+                value={authPassword}
+                onChange={(e) => setAuthPassword(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "10px",
+                  borderRadius: "4px",
+                  border: "1px solid #555",
+                  background: "#1a1a1a",
+                  color: "#fff",
+                }}
+              />
+            </div>
+            <div style={{ display: "flex", gap: "10px" }}>
+              <button
+                onClick={signIn}
+                disabled={loading.auth}
+                style={{ flex: 1 }}
+              >
+                {loading.auth ? "Signing in..." : "Sign In"}
+              </button>
+              <button
+                onClick={signUp}
+                disabled={loading.auth}
+                style={{ flex: 1, background: "#666" }}
+              >
+                {loading.auth ? "Signing up..." : "Sign Up"}
+              </button>
+            </div>
+            {authError && (
+              <p
+                style={{
+                  marginTop: "10px",
+                  color: authError.includes("Check your email") ? "#4CAF50" : "#f44336",
+                  fontSize: "14px",
+                }}
+              >
+                {authError}
+              </p>
+            )}
+          </div>
+        )}
+      </div>
 
       <div className="card">
         <h2>Edge Function Invokers</h2>
