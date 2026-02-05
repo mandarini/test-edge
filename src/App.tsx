@@ -9,8 +9,7 @@ import {
 } from "@supabase/supabase-js";
 import type { Session } from "@supabase/supabase-js";
 
-import { corsHeaders, createCorsHeaders } from '@supabase/supabase-js/cors'
-
+import { corsHeaders } from "@supabase/supabase-js/cors";
 
 function App() {
   const [helloWorldResponse, setHelloWorldResponse] = useState<any>(null);
@@ -67,23 +66,6 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-
-  const headers = createCorsHeaders({
-    origin: "https://supa-edge-test.netlify.app",
-    credentials: true,
-  });
-
-  console.log("headers", headers);
-
-  const otherHeadersDefault = corsHeaders;
-  console.log("otherHeadersDefault", otherHeadersDefault);
-
-  const otherHeaders = createCorsHeaders({
-    origin: "https://supa-edge-test.netlify.app",
-    credentials: true,
-  });
-  console.log("otherHeaders", otherHeaders);
-
   // File upload state
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadResponse, setUploadResponse] = useState<any>(null);
@@ -99,10 +81,6 @@ function App() {
   const [httpMethodTodoId, setHttpMethodTodoId] = useState("");
   const [httpMethodComplete, setHttpMethodComplete] = useState(false);
 
-  // CORS SDK Demo state
-  const [corsScenario, setCorsScenario] = useState<string>("basic");
-  const [corsSdkResponse, setCorsSdkResponse] = useState<any>(null);
-  const [corsSdkLoading, setCorsSdkLoading] = useState(false);
 
   // DB Operations state
   const [dbOpsResponse, setDbOpsResponse] = useState<any>(null);
@@ -172,9 +150,12 @@ function App() {
     setGetClaimsResponse(null);
 
     try {
-      const { data, error } = await supabase.functions.invoke("get-claims-demo", {
-        method: "GET",
-      });
+      const { data, error } = await supabase.functions.invoke(
+        "get-claims-demo",
+        {
+          method: "GET",
+        },
+      );
 
       if (error) {
         if (error instanceof FunctionsHttpError) {
@@ -498,9 +479,12 @@ function App() {
     setHttpMethodResponse(null);
 
     try {
-      const { data, error } = await supabase.functions.invoke("all-http-methods", {
-        method: "GET",
-      });
+      const { data, error } = await supabase.functions.invoke(
+        "all-http-methods",
+        {
+          method: "GET",
+        },
+      );
 
       if (error) throw error;
       setHttpMethodResponse(data);
@@ -525,10 +509,13 @@ function App() {
     setHttpMethodResponse(null);
 
     try {
-      const { data, error } = await supabase.functions.invoke("all-http-methods", {
-        method: "POST",
-        body: { task: httpMethodTask },
-      });
+      const { data, error } = await supabase.functions.invoke(
+        "all-http-methods",
+        {
+          method: "POST",
+          body: { task: httpMethodTask },
+        },
+      );
 
       if (error) throw error;
       setHttpMethodResponse(data);
@@ -554,13 +541,16 @@ function App() {
     setHttpMethodResponse(null);
 
     try {
-      const { data, error } = await supabase.functions.invoke("all-http-methods", {
-        method: "PUT",
-        body: {
-          id: parseInt(httpMethodTodoId),
-          is_complete: httpMethodComplete,
+      const { data, error } = await supabase.functions.invoke(
+        "all-http-methods",
+        {
+          method: "PUT",
+          body: {
+            id: parseInt(httpMethodTodoId),
+            is_complete: httpMethodComplete,
+          },
         },
-      });
+      );
 
       if (error) throw error;
       setHttpMethodResponse(data);
@@ -585,13 +575,16 @@ function App() {
     setHttpMethodResponse(null);
 
     try {
-      const { data, error } = await supabase.functions.invoke("all-http-methods", {
-        method: "PATCH",
-        body: {
-          id: parseInt(httpMethodTodoId),
-          is_complete: httpMethodComplete,
+      const { data, error } = await supabase.functions.invoke(
+        "all-http-methods",
+        {
+          method: "PATCH",
+          body: {
+            id: parseInt(httpMethodTodoId),
+            is_complete: httpMethodComplete,
+          },
         },
-      });
+      );
 
       if (error) throw error;
       setHttpMethodResponse(data);
@@ -616,10 +609,13 @@ function App() {
     setHttpMethodResponse(null);
 
     try {
-      const { data, error } = await supabase.functions.invoke("all-http-methods", {
-        method: "DELETE",
-        body: { id: parseInt(httpMethodTodoId) },
-      });
+      const { data, error } = await supabase.functions.invoke(
+        "all-http-methods",
+        {
+          method: "DELETE",
+          body: { id: parseInt(httpMethodTodoId) },
+        },
+      );
 
       if (error) throw error;
       setHttpMethodResponse(data);
@@ -635,41 +631,6 @@ function App() {
     }
   };
 
-  // CORS SDK Demo test
-  const testCorsSdkScenario = async () => {
-    setCorsSdkLoading(true);
-    setCorsSdkResponse(null);
-
-    try {
-      const { data, error } = await supabase.functions.invoke(
-        `cors-sdk-demo?scenario=${corsScenario}`,
-        {
-          method: "GET",
-        }
-      );
-
-      if (error) {
-        if (error instanceof FunctionsHttpError) {
-          const errorMessage = await error.context.json();
-          console.error("Function returned an error", errorMessage);
-          setCorsSdkResponse({ error: errorMessage });
-        } else if (error instanceof FunctionsRelayError) {
-          console.error("Relay error:", error.message);
-          setCorsSdkResponse({ error: error.message });
-        } else if (error instanceof FunctionsFetchError) {
-          console.error("Fetch error:", error.message);
-          setCorsSdkResponse({ error: error.message });
-        }
-      } else {
-        setCorsSdkResponse(data);
-      }
-    } catch (err) {
-      console.error("Unexpected error:", err);
-      setCorsSdkResponse({ error: String(err) });
-    } finally {
-      setCorsSdkLoading(false);
-    }
-  };
 
   return (
     <>
@@ -683,7 +644,8 @@ function App() {
       <div className="card">
         <h2>🔐 Authentication & getClaims Demo</h2>
         <p style={{ fontSize: "14px", color: "#888", marginBottom: "15px" }}>
-          Sign in to get a JWT token, then test the get-claims-demo Edge Function.
+          Sign in to get a JWT token, then test the get-claims-demo Edge
+          Function.
         </p>
 
         {session ? (
@@ -724,9 +686,16 @@ function App() {
               <h3 style={{ color: "#9C27B0", marginTop: 0 }}>
                 🧪 Test getClaims Function
               </h3>
-              <p style={{ fontSize: "12px", color: "#aaa", marginBottom: "10px" }}>
-                This calls the <code>get-claims-demo</code> Edge Function which uses{" "}
-                <code>supabase.auth.getClaims(token)</code> to verify your JWT and extract claims.
+              <p
+                style={{
+                  fontSize: "12px",
+                  color: "#aaa",
+                  marginBottom: "10px",
+                }}
+              >
+                This calls the <code>get-claims-demo</code> Edge Function which
+                uses <code>supabase.auth.getClaims(token)</code> to verify your
+                JWT and extract claims.
               </p>
               <button
                 onClick={invokeGetClaims}
@@ -823,7 +792,9 @@ function App() {
               <p
                 style={{
                   marginTop: "10px",
-                  color: authError.includes("Check your email") ? "#4CAF50" : "#f44336",
+                  color: authError.includes("Check your email")
+                    ? "#4CAF50"
+                    : "#f44336",
                   fontSize: "14px",
                 }}
               >
@@ -1087,12 +1058,14 @@ function App() {
             🔧 HTTP DELETE Method (New Approach)
           </h3>
           <p style={{ fontSize: "13px", color: "#aaa", marginBottom: "10px" }}>
-            <strong>How it works:</strong> Uses actual HTTP DELETE method to delete a todo from the database
+            <strong>How it works:</strong> Uses actual HTTP DELETE method to
+            delete a todo from the database
             <br />
             <strong>CORS requirement:</strong> Requires
             Access-Control-Allow-Methods header
             <br />
-            <strong>Note:</strong> Load todos above to see available IDs to delete
+            <strong>Note:</strong> Load todos above to see available IDs to
+            delete
           </p>
           <div
             style={{
@@ -1103,7 +1076,8 @@ function App() {
             }}
           >
             <code style={{ fontSize: "12px", color: "#FF9800" }}>
-              supabase.functions.invoke('delete-method', {"{"} method: 'DELETE', body: {"{"} id {"}"} {"}"})
+              supabase.functions.invoke('delete-method', {"{"} method: 'DELETE',
+              body: {"{"} id {"}"} {"}"})
             </code>
           </div>
           <input
@@ -1114,7 +1088,9 @@ function App() {
             style={{ width: "120px", padding: "8px", marginRight: "10px" }}
           />
           <button onClick={testDeleteMethod} disabled={loading.deleteMethod}>
-            {loading.deleteMethod ? "Deleting..." : "Delete Todo with HTTP DELETE"}
+            {loading.deleteMethod
+              ? "Deleting..."
+              : "Delete Todo with HTTP DELETE"}
           </button>
         </div>
 
@@ -1142,7 +1118,8 @@ function App() {
       <div className="card">
         <h2>🌐 All HTTP Methods Test (Complete CORS Demonstration)</h2>
         <p style={{ fontSize: "14px", color: "#888", marginBottom: "15px" }}>
-          Test all HTTP methods in one function. Shows which methods are "simple" vs "non-simple" for CORS.
+          Test all HTTP methods in one function. Shows which methods are
+          "simple" vs "non-simple" for CORS.
         </p>
 
         <div
@@ -1199,7 +1176,8 @@ function App() {
             ⚠️ Non-Simple Methods (REQUIRE Access-Control-Allow-Methods)
           </h3>
           <p style={{ fontSize: "13px", color: "#aaa", marginBottom: "15px" }}>
-            These methods trigger CORS preflight and require the <code>Access-Control-Allow-Methods</code> header!
+            These methods trigger CORS preflight and require the{" "}
+            <code>Access-Control-Allow-Methods</code> header!
           </p>
 
           <div style={{ marginBottom: "15px" }}>
@@ -1267,17 +1245,19 @@ function App() {
               <strong>Simple Methods (work with basic CORS):</strong>
               <br />
               • GET, HEAD, POST (with simple content-types)
-              <br />
-              • Don't require <code>Access-Control-Allow-Methods</code> header
+              <br />• Don't require <code>
+                Access-Control-Allow-Methods
+              </code>{" "}
+              header
             </p>
             <p>
               <strong>Non-Simple Methods (require full CORS):</strong>
               <br />
               • PUT, PATCH, DELETE, and custom methods
-              <br />
-              • MUST have <code>Access-Control-Allow-Methods</code> in preflight response
-              <br />
-              • Browser will block these requests without proper CORS headers!
+              <br />• MUST have <code>Access-Control-Allow-Methods</code> in
+              preflight response
+              <br />• Browser will block these requests without proper CORS
+              headers!
             </p>
           </div>
         </div>
@@ -1306,15 +1286,13 @@ function App() {
       </div>
 
       <div className="card">
-        <h2>🎯 CORS SDK Demo - All Scenarios</h2>
+        <h2>🎯 CORS Headers Import Test</h2>
         <p style={{ fontSize: "14px", color: "#888", marginBottom: "15px" }}>
-          Test the new @supabase/supabase-js/cors module with different configurations.
-          This demonstrates how the SDK automatically includes all required CORS headers.
+          Testing the <code>@supabase/supabase-js/cors</code> import.
         </p>
 
         <div
           style={{
-            marginBottom: "20px",
             padding: "15px",
             border: "1px solid #9C27B0",
             borderRadius: "8px",
@@ -1322,140 +1300,23 @@ function App() {
           }}
         >
           <h3 style={{ color: "#9C27B0", marginTop: 0 }}>
-            Select CORS Scenario
+            ✅ Import Working
           </h3>
-
-          <div style={{ marginBottom: "15px" }}>
-            <select
-              value={corsScenario}
-              onChange={(e) => setCorsScenario(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "10px",
-                fontSize: "14px",
-                borderRadius: "4px",
-                border: "1px solid #555",
-                background: "#1a1a1a",
-                color: "#fff",
-              }}
-            >
-              <option value="basic">Basic - Wildcard origin (*)</option>
-              <option value="custom-origin">Custom Origin - Specific domain</option>
-              <option value="with-credentials">With Credentials - Cookies & auth headers</option>
-              <option value="additional-headers">Additional Headers - Custom headers & methods</option>
-              <option value="multiple-origins">Multiple Origins - Allowlist validation</option>
-            </select>
-          </div>
-
-          <div
+          <p style={{ fontSize: "13px", color: "#aaa", marginBottom: "10px" }}>
+            <code>import {"{"} corsHeaders {"}"} from "@supabase/supabase-js/cors"</code>
+          </p>
+          <pre
             style={{
+              textAlign: "left",
               background: "#1a1a1a",
-              padding: "10px",
-              borderRadius: "4px",
-              marginBottom: "15px",
+              padding: "15px",
+              borderRadius: "8px",
               fontSize: "12px",
-              color: "#aaa",
+              overflow: "auto",
             }}
           >
-            <strong>Scenario Description:</strong>
-            <br />
-            {corsScenario === "basic" && (
-              <>
-                Uses default <code>corsHeaders</code> - allows any origin with all Supabase SDK headers.
-              </>
-            )}
-            {corsScenario === "custom-origin" && (
-              <>
-                Uses <code>createCorsHeaders()</code> to restrict access to a specific origin (https://myapp.com).
-              </>
-            )}
-            {corsScenario === "with-credentials" && (
-              <>
-                Enables credentials with <code>createCorsHeaders({"{"}origin: 'https://myapp.com', credentials: true{"}"})</code>.
-              </>
-            )}
-            {corsScenario === "additional-headers" && (
-              <>
-                Adds custom headers beyond Supabase defaults: x-custom-header, x-api-version, x-request-id.
-              </>
-            )}
-            {corsScenario === "multiple-origins" && (
-              <>
-                Validates request origin against an allowlist and returns specific origin for credentials support.
-              </>
-            )}
-          </div>
-
-          <button
-            onClick={testCorsSdkScenario}
-            disabled={corsSdkLoading}
-            style={{ width: "100%", padding: "12px", fontSize: "16px" }}
-          >
-            {corsSdkLoading ? "Testing..." : `🧪 Test ${corsScenario} Scenario`}
-          </button>
-        </div>
-
-        {corsSdkResponse && (
-          <div style={{ marginTop: "20px" }}>
-            <h4>
-              {corsSdkResponse.error
-                ? "❌ Error Response:"
-                : "✅ Success Response:"}
-            </h4>
-            <pre
-              style={{
-                textAlign: "left",
-                background: corsSdkResponse.error ? "#d32f2f" : "#1a1a1a",
-                padding: "15px",
-                borderRadius: "8px",
-                maxHeight: "500px",
-                overflow: "auto",
-                fontSize: "12px",
-              }}
-            >
-              {JSON.stringify(corsSdkResponse, null, 2)}
-            </pre>
-          </div>
-        )}
-
-        <div
-          style={{
-            marginTop: "20px",
-            padding: "15px",
-            border: "1px solid #2196F3",
-            borderRadius: "8px",
-            background: "rgba(33, 150, 243, 0.1)",
-          }}
-        >
-          <h4 style={{ color: "#2196F3", marginTop: 0 }}>
-            📚 About @supabase/supabase-js/cors
-          </h4>
-          <div style={{ fontSize: "13px", color: "#aaa", lineHeight: "1.8" }}>
-            <p>
-              <strong>What it does:</strong>
-              <br />
-              Automatically includes all headers sent by Supabase client libraries (authorization, x-client-info, apikey, etc.)
-              and stays synchronized with SDK updates.
-            </p>
-            <p>
-              <strong>Usage in your code:</strong>
-              <br />
-              <code style={{ color: "#9C27B0" }}>
-                import {"{"}corsHeaders, createCorsHeaders{"}"} from '@supabase/supabase-js/cors'
-              </code>
-            </p>
-            <p>
-              <strong>Benefits:</strong>
-              <br />
-              • No more manual CORS header maintenance
-              <br />
-              • Automatically updated when SDK adds new headers
-              <br />
-              • Prevents CORS errors in Edge Functions
-              <br />
-              • Type-safe with TypeScript support
-            </p>
-          </div>
+            {JSON.stringify(corsHeaders, null, 2)}
+          </pre>
         </div>
       </div>
 
