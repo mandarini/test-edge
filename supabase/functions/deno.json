@@ -1,6 +1,6 @@
 {
   "imports": {
-    "@supabase/supabase-js": "npm:@supabase/supabase-js@2.95.0",
-    "@supabase/supabase-js/cors": "npm:@supabase/supabase-js@2.95.0/cors"
+    "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.95.0/+esm",
+    "@supabase/supabase-js/cors": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.95.0/dist/cors.mjs"
   }
 }
